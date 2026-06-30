@@ -7,7 +7,7 @@ import torch.nn as nn
 
 from .configs import ExperimentConfig
 from .metrics import compute_dead_ratio, sample_activation_dist
-from .model import ACTIVATIONS, CNN
+from .model import ACTIVATIONS, CNN, DeepCNN
 
 
 def train_one_experiment(
@@ -19,7 +19,8 @@ def train_one_experiment(
 ) -> None:
     results_dir.mkdir(parents=True, exist_ok=True)
 
-    model = CNN(config.in_channels, config.num_classes, config.activation).to(device)
+    model_cls = DeepCNN if config.model_type == "deep_cnn" else CNN
+    model = model_cls(config.in_channels, config.num_classes, config.activation).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=config.lr)
     criterion = nn.CrossEntropyLoss()
     activation_cls = ACTIVATIONS[config.activation]
@@ -29,6 +30,7 @@ def train_one_experiment(
             "dataset": config.dataset,
             "activation": config.activation,
             "epochs": config.epochs,
+            "model_type": config.model_type,
         },
         "epoch": [], "train_loss": [], "train_acc": [],
         "val_loss": [], "val_acc": [], "dead_ratio": [],
