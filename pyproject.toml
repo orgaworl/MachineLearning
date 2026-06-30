@@ -9,6 +9,10 @@ dependencies = [
     "numpy>=1.26.0",
 ]
 
+[project.scripts]
+train = "activation_exp.cli:train"
+plot  = "activation_exp.cli:plot"
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"

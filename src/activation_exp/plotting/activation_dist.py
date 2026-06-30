@@ -8,9 +8,9 @@ import numpy as np
 matplotlib.rcParams["font.family"] = "PingFang SC"
 matplotlib.rcParams["axes.unicode_minus"] = False
 
-RESULTS_DIR = Path(__file__).parent.parent / "results"
-OUTPUT_DIR = Path(__file__).parent / "output"
-OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+_ROOT = Path(__file__).parent.parent.parent.parent
+RESULTS_DIR = _ROOT / "results"
+OUTPUT_DIR = _ROOT / "plots"
 
 ACT_ORDER = ["relu", "leaky_relu", "swish", "gelu"]
 
@@ -43,7 +43,7 @@ def load_data() -> dict[str, dict[str, dict]]:
 def main():
     datasets = load_data()
     if not datasets:
-        print("No results found. Run experiments/run_all.py first.")
+        print("No results found. Run: uv run train")
         return
 
     for dataset, act_data in datasets.items():
@@ -51,7 +51,6 @@ def main():
             set().union(*[set(d.keys()) for d in act_data.values()]),
             key=lambda k: int(k.split("_")[1]),
         )
-        # 均匀采样 4 列：首列、末列固定，中间从剩余里等间距取
         n_keep = 4
         if len(all_keys) > n_keep:
             step = (len(all_keys) - 1) / (n_keep - 1)
@@ -59,7 +58,6 @@ def main():
         acts_present = [a for a in ACT_ORDER if a in act_data]
         n_rows, n_cols = len(acts_present), len(all_keys)
 
-        # 计算本组所有子图的统一 x/y 范围
         all_vals_flat = np.concatenate([
             act_data[a][k]
             for a in acts_present
@@ -69,13 +67,12 @@ def main():
         x_lo = float(np.percentile(all_vals_flat, 0.5))
         x_hi = float(np.percentile(all_vals_flat, 99.5))
 
-        # 用统一 x 范围重新建 hist，确定 y 上限
         y_hi = 0.0
         for a in acts_present:
             for k in all_keys:
                 if k not in act_data[a]:
                     continue
-                counts, edges = np.histogram(
+                counts, _ = np.histogram(
                     act_data[a][k], bins=60, range=(x_lo, x_hi), density=True
                 )
                 y_hi = max(y_hi, float(counts.max()))

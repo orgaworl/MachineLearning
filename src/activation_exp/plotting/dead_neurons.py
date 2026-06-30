@@ -7,9 +7,9 @@ import matplotlib
 matplotlib.rcParams["font.family"] = "PingFang SC"
 matplotlib.rcParams["axes.unicode_minus"] = False
 
-RESULTS_DIR = Path(__file__).parent.parent / "results"
-OUTPUT_DIR = Path(__file__).parent / "output"
-OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+_ROOT = Path(__file__).parent.parent.parent.parent
+RESULTS_DIR = _ROOT / "results"
+OUTPUT_DIR = _ROOT / "plots"
 
 COLORS = {"relu": "#1f77b4", "leaky_relu": "#ff7f0e", "swish": "#2ca02c", "gelu": "#d62728"}
 
@@ -38,7 +38,7 @@ def load_results() -> dict[str, dict[str, dict]]:
 def main():
     datasets = load_results()
     if not datasets:
-        print("No results found. Run experiments/run_all.py first.")
+        print("No results found. Run: uv run train")
         return
 
     n = len(datasets)

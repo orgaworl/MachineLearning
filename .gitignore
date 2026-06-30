@@ -10,5 +10,7 @@ wheels/
 .venv
 data/
 plots/output/
+plots/*.png
+plots/*.pdf
 results/
 docs/
